@@ -87,10 +87,7 @@ const AccessProducts5 = () => {
 
 				<div className='w-full sm:w-1/2 border border-gray-300 rounded-xl py-6 px-4 sm:px-8 my-8'>
 					<h1 className='text-3xl font-bold'>Details</h1>
-					<div className='flex  items-center justify-between gap-4 py-6'>
-						<p>Brand</p>
-						<p className='font-bold'>{productData.brand}</p>
-					</div>
+					
 					<div className='flex  items-center justify-between gap-4'>
 						<p>Condition</p>
 						<p className='font-bold'>{productData.condition}</p>

@@ -26,7 +26,7 @@ export const AccessSubProducts6 = ({ category }) => {
 			</div>
 			<div
 				data-aos='fade-right'
-				className='grid mt-10  grid-cols-2 sm:grid-cols-3 md:grid-cols-4  lg:grid-cols-5 gap-4 gap-y-6'>
+				className='grid mt-10  grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 gap-y-6'>
 				{related.map((item) => (
 					<LatestCollection6Items
 						key={item._id}

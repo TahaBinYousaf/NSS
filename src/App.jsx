@@ -19,6 +19,7 @@ import Collection7 from './pages/Collection7';
 import AccessProducts7 from './components/AccessProducts7';
 import MainCollection from './pages/MainCollection';
 import AccessProducts8 from './components/AccessProducts8';
+import PostAd from './pages/PostAd';
 
 function App() {
 	const [searchQuery, setSearchQuery] = useState('');
@@ -107,6 +108,10 @@ function App() {
 				<Route
 					path='/product8/:productid'
 					element={<AccessProducts8 />}
+				/>
+				<Route
+					path="/post-ad"
+					element={<PostAd />}
 				/>
 			</Routes>
 			<Footer></Footer>

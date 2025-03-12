@@ -35,7 +35,7 @@ export const LatestCollection2 = () => {
 					<div
 						data-aos='fade-right'
 						key={index}
-						className='w-full sm:w-[48%] md:w-[31%] lg:w-[23%] pb-2 bg-white rounded-lg'>
+						className='w-full sm:w-[48%] md:w-[48%] lg:w-[23%] pb-2 bg-white rounded-lg'>
 						<LatestCollection2Item
 							id={item._id}
 							image={item.image}

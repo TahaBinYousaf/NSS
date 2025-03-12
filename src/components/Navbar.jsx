@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { IoMdSearch } from "react-icons/io";
 import { FaPlus, FaTimes, FaApple, FaGoogle } from "react-icons/fa";
 import { IoLocationOutline } from "react-icons/io5";
@@ -15,7 +15,7 @@ const Navbar = ({ onSearch }) => {
   const navigate = useNavigate();
 
   // Handle search input changes
-  const handleSearch = (e) => {
+  const handleSearch = e => {
     setSearchQuery(e.target.value);
     if (e.target.value.trim() || category) {
       navigate("/search");
@@ -25,7 +25,7 @@ const Navbar = ({ onSearch }) => {
   };
 
   // Handle category selection
-  const handleCategoryChange = (selectedCategory) => {
+  const handleCategoryChange = selectedCategory => {
     setCategory(selectedCategory);
     setDropdownOpen(false);
   };
@@ -37,7 +37,7 @@ const Navbar = ({ onSearch }) => {
 
   // Close dropdown if clicked outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = event => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setDropdownOpen(false);
       }
@@ -57,22 +57,19 @@ const Navbar = ({ onSearch }) => {
     onSearch(searchQuery, category);
   }, [searchQuery, category, onSearch]);
 
-  return (
+  const hideNavbarForPages = ["/post-ad"];
+  const { pathname } = useLocation();
+  const hideNavbar = useMemo(() => hideNavbarForPages.includes(pathname), [pathname]);
+  return hideNavbar ? null : (
     <>
       <nav className="shadow-md px-4 md:px-8 py-6 bg-white">
-        <div className="flex flex-col md:flex-row items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3 w-full">
             <NavLink to={"/"}>
-              <img
-                src={Image1}
-                alt="Logo"
-                className="w-13 md:w-17 cursor-pointer object-contain"
-              />
+              <img src={Image1} alt="Logo" className="w-13 md:w-17 cursor-pointer object-contain" />
             </NavLink>
             <h1 className="hidden md:block text-3xl">|</h1>
-            <h1 className="text-lg italic font-serif">
-              Connect with your community
-            </h1>
+            <h1 className="text-lg italic font-serif">Connect with your community</h1>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -81,14 +78,12 @@ const Navbar = ({ onSearch }) => {
               <div className="relative w-full md:w-56" ref={dropdownRef}>
                 <button
                   className="w-full px-6 py-3 h-16 border border-gray-300 rounded-full flex items-center justify-between focus:outline-none transition-all duration-300"
-                  onClick={() => setDropdownOpen((prev) => !prev)}
+                  onClick={() => setDropdownOpen(prev => !prev)}
                   aria-expanded={dropdownOpen}
                   aria-haspopup="listbox"
                 >
                   <IoLocationOutline className="text-gray-500 text-2xl" />
-                  <span className="text-gray-700 truncate">
-                    {category || "Lahore"}
-                  </span>
+                  <span className="text-gray-700 truncate">{category || "Lahore"}</span>
                   <span className="text-gray-500 text-lg">&#9662;</span>
                 </button>
                 {dropdownOpen && (
@@ -104,11 +99,7 @@ const Navbar = ({ onSearch }) => {
                       "Cantonment Cantt",
                       "Askari Housing Society",
                     ].map((item, index) => (
-                      <li
-                        key={index}
-                        className="px-4 py-3 hover:bg-gray-200 cursor-pointer transition"
-                        onClick={() => handleCategoryChange(item)}
-                      >
+                      <li key={index} className="px-4 py-3 hover:bg-gray-200 cursor-pointer transition" onClick={() => handleCategoryChange(item)}>
                         {item}
                       </li>
                     ))}
@@ -117,10 +108,7 @@ const Navbar = ({ onSearch }) => {
               </div>
 
               {/* Search Bar */}
-              <div
-                className="relative w-full md:w-[500px] absolute top-0"
-                ref={searchRef}
-              >
+              <div className="relative w-full md:w-[500px] absolute top-0" ref={searchRef}>
                 <div className="relative">
                   <IoMdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-2xl" />
                   <input
@@ -132,10 +120,7 @@ const Navbar = ({ onSearch }) => {
                     onFocus={() => setDropdownOpen(false)}
                   />
                   {searchQuery && (
-                    <FaTimes
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
-                      onClick={clearSearch}
-                    />
+                    <FaTimes className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer" onClick={clearSearch} />
                   )}
                 </div>
               </div>
@@ -151,7 +136,7 @@ const Navbar = ({ onSearch }) => {
             </button>
 
             <button
-              onClick={() => setIsOpen(true)}
+              onClick={() => navigate("/post-ad")}
               className="flex items-center gap-2 cursor-pointer px-4 md:px-6 py-2 md:py-3 font-bold text-white rounded-full bg-gradient-to-r from-blue-500 to-black transition-all duration-300 ease-in-out transform hover:scale-105 hover:brightness-110"
             >
               <FaPlus className="font-bold" />
@@ -165,24 +150,15 @@ const Navbar = ({ onSearch }) => {
       {isOpen && (
         <div className="fixed inset-0 z-50 backdrop-blur-md flex items-center justify-center">
           <div className="bg-white rounded-lg p-6 w-full max-w-[400px] shadow-lg relative mx-4">
-            <button
-              onClick={() => setIsOpen(false)}
-              className="absolute top-4 font-bold cursor-pointer right-4 text-3xl"
-            >
+            <button onClick={() => setIsOpen(false)} className="absolute top-4 font-bold cursor-pointer right-4 text-3xl">
               &times;
             </button>
 
             <div className="flex justify-center mb-4">
-              <img
-                src={Image1}
-                alt="Logo"
-                className="w-14 md:w-18 object-contain"
-              />
+              <img src={Image1} alt="Logo" className="w-14 md:w-18 object-contain" />
             </div>
 
-            <h2 className="text-center text-xl font-semibold text-gray-800">
-              Login into your account
-            </h2>
+            <h2 className="text-center text-xl font-semibold text-gray-800">Login into your account</h2>
             <div className="space-y-1 mt-5">
               <input
                 type="text"
@@ -201,13 +177,9 @@ const Navbar = ({ onSearch }) => {
               />
             </div>
 
-            <p className="text-center my-3 text-md cursor-pointer underline">
-              Forgot Password?
-            </p>
+            <p className="text-center my-3 text-md cursor-pointer underline">Forgot Password?</p>
 
-            <button className="w-full cursor-pointer bg-black text-white rounded-full py-2">
-              Login
-            </button>
+            <button className="w-full cursor-pointer bg-black text-white rounded-full py-2">Login</button>
 
             <div className="mt-6 space-y-3">
               <div className="flex items-center my-3">
@@ -226,9 +198,7 @@ const Navbar = ({ onSearch }) => {
               </button>
             </div>
 
-            <p className="text-center text-sm mt-4 cursor-pointer hover:underline">
-              New to NSS? Create an account
-            </p>
+            <p className="text-center text-sm mt-4 cursor-pointer hover:underline">New to NSS? Create an account</p>
           </div>
         </div>
       )}

@@ -22,7 +22,7 @@ export const LatestCollection3Items = ({
 				<div className='overflow-hidden rounded-lg w-full'>
 					<img
 						src={image}
-						className='w-full h-[250px] sm:h-[300px] md:h-[350px] hover:scale-110 transition ease-in-out'
+						className='w-full h-[350px] sm:h-[350px] md:h-[350px] hover:scale-110 transition ease-in-out object-cover'
 						alt=''
 					/>
 				</div>
