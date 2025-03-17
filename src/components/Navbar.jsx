@@ -9,8 +9,8 @@ import Login from "../auth/Login";
 import Signup from "../auth/Signup";
 import Forget from "../auth/Forget";
 import Profile from "../auth/Profile";
-import ProfileImg from "../assets/logo1.png";
 import { IoIosArrowDown } from "react-icons/io";
+import ProfileImg from "../assets/logo1.png";
 
 const Navbar = ({ onSearch }) => {
   const [modalType, modalTypeSet] = useState("");
@@ -137,6 +137,7 @@ const Navbar = ({ onSearch }) => {
             </div>
           </div>
 
+          {/** PHOTO */}
           <div className="flex items-center gap-1 md:gap-4 mt-4 md:mt-0 flex-row-reverse ml-4 md:ml-0 md:flex-row">
             {isLoggedIn ? (
               <div className="relative">
