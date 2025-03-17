@@ -1,19 +1,28 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { IoMdSearch } from "react-icons/io";
-import { FaPlus, FaTimes, FaApple, FaGoogle } from "react-icons/fa";
+import { FaPlus, FaTimes } from "react-icons/fa";
 import { IoLocationOutline } from "react-icons/io5";
 import Image1 from "../assets/logo.png";
-import axios from "axios";
+import RenderWhen from "./RenderWhen";
+import Login from "../auth/Login";
+import Signup from "../auth/Signup";
+import Forget from "../auth/Forget";
+import Profile from "../auth/Profile";
+import ProfileImg from "../assets/logo1.png";
+import { IoIosArrowDown } from "react-icons/io";
 
 const Navbar = ({ onSearch }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [modalType, modalTypeSet] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const searchRef = useRef(null);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const [profileModalOpen, profileModalOpenSet] = useState(false);
+
+  const [isLoggedIn, isLoggedInSet] = useState(true);
 
   // Handle search input changes
   const handleSearch = e => {
@@ -64,7 +73,7 @@ const Navbar = ({ onSearch }) => {
   return hideNavbar ? null : (
     <>
       <nav className="shadow-md px-4 md:px-8 py-6 bg-white">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex flex-col xl:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3 w-full">
             <NavLink to={"/"}>
               <img src={Image1} alt="Logo" className="w-13 md:w-17 cursor-pointer object-contain" />
@@ -128,13 +137,25 @@ const Navbar = ({ onSearch }) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-1 md:gap-4 mt-4 md:mt-0">
-            <button
-              onClick={() => setIsOpen(true)}
-              className="cursor-pointer text-sm md:text-lg font-bold transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-gray-200 px-4 py-2 rounded-md ml-1"
-            >
-              Login
-            </button>
+          <div className="flex items-center gap-1 md:gap-4 mt-4 md:mt-0 flex-row-reverse ml-4 md:ml-0 md:flex-row">
+            {isLoggedIn ? (
+              <div className="relative">
+                <div className="flex items-center gap-1" aria-expanded={profileModalOpen} onClick={() => profileModalOpenSet(pre => !pre)}>
+                  <button className="relative cursor-pointer size-16 hover:bg-gray-200 rounded-full overflow-hidden ml-1">
+                    <img src={ProfileImg} className="size-full object-cover" />
+                  </button>
+                  <IoIosArrowDown className={`${profileModalOpen ? "" : "rotate-180"} size-5`} />
+                </div>
+                {profileModalOpen && <ProfileDropdown open={profileModalOpen} openSet={profileModalOpenSet} />}
+              </div>
+            ) : (
+              <button
+                onClick={() => modalTypeSet("Login")}
+                className="cursor-pointer text-sm md:text-lg font-bold transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-gray-200 px-4 py-2 rounded-md ml-1"
+              >
+                Login
+              </button>
+            )}
 
             <button
               onClick={() => navigate("/post-ad")}
@@ -148,87 +169,85 @@ const Navbar = ({ onSearch }) => {
       </nav>
 
       {/* Login Modal */}
-      {isOpen && <LoginModal isOpen={isOpen} setIsOpen={setIsOpen} />}
+      <RenderWhen is={modalType === "Login"}>
+        <Login modalTypeSet={modalTypeSet} />
+      </RenderWhen>
+
+      {/* Signup Modal */}
+      <RenderWhen is={modalType === "Signup"}>
+        <Signup modalTypeSet={modalTypeSet} />
+      </RenderWhen>
+
+      {/* Forget Modal */}
+      <RenderWhen is={modalType === "Forget"}>
+        <Forget modalTypeSet={modalTypeSet} />
+      </RenderWhen>
+
+      {/* Forget Modal */}
+      <RenderWhen is={modalType === "Profile"}>
+        <Profile modalTypeSet={modalTypeSet} />
+      </RenderWhen>
     </>
   );
 };
 
 export default Navbar;
 
+function ProfileDropdown({ open, openSet }) {
+  const dropdownRef = useRef(null);
+  const navigate = useNavigate();
 
-
-function LoginModal({ isOpen, setIsOpen }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  async function login(){
-    try{
-      const response = await axios.post("http://localhost:5000/api/auth/login", {email, password});
-      if(response?.data){
-        console.log(response.data);
+  useEffect(() => {
+    const handleClickOutside = event => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        openSet(false);
       }
-    }catch(err){
-      console.log(err);
-    }
-  }
+    };
 
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
+  return (
+    <div
+      ref={dropdownRef}
+      className="absolute bg-white rounded-md border border-gray-200 py-4 min-w-96 left-1/2 -translate-x-2/3 z-50 shadow-2xl mt-2 flex flex-col gap-4"
+    >
+      <div className="flex flex-col gap-4 mx-4">
+        <div className="flex items-center gap-6">
+          <div className="relative cursor-pointer size-16 hover:bg-gray-200 rounded-full overflow-hidden ml-1">
+            <img src={ProfileImg} className="size-full object-cover" />
+          </div>
 
-  return <div className="fixed inset-0 z-50 backdrop-blur-md flex items-center justify-center">
-    <div className="bg-white rounded-lg p-6 w-full max-w-[400px] shadow-lg relative mx-4">
-      <button onClick={() => setIsOpen(false)} className="absolute top-4 font-bold cursor-pointer right-4 text-3xl">
-        &times;
-      </button>
-
-      <div className="flex justify-center mb-4">
-        <img src={Image1} alt="Logo" className="w-14 md:w-18 object-contain" />
-      </div>
-
-      <h2 className="text-center text-xl font-semibold text-gray-800">Login into your account</h2>
-      <div className="space-y-1 mt-5">
-        <input
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-          type="text"
-          id="emailOrUsername"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-          placeholder="Enter your email or username"
-        />
-      </div>
-
-      <div className="space-y-1 mt-3">
-        <input
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-          type="password"
-          id="password"
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-          placeholder="Enter your password"
-        />
-      </div>
-
-      <p className="text-center my-3 text-md cursor-pointer underline">Forgot Password?</p>
-
-      <button onClick={login} className="w-full cursor-pointer bg-black text-white rounded-full py-2">Login</button>
-
-      <div className="mt-6 space-y-3">
-        <div className="flex items-center my-3">
-          <div className="flex-grow border-t border-gray-300"></div>
-          <span className="px-3 text-gray-500">OR</span>
-          <div className="flex-grow border-t border-gray-300"></div>
+          <div className="flex flex-col">
+            <div>Hello, </div>
+            <div className="text-2xl font-bold">Qarar Ahmad</div>
+          </div>
         </div>
 
-        <button className="w-full flex items-center justify-center gap-2 border border-gray-400 rounded-full py-2 cursor-pointer transition">
-          <FaApple className="text-xl" />
-          Continue with Apple
-        </button>
-        <button className="w-full flex items-center justify-center gap-2 border border-gray-400 rounded-full py-2 cursor-pointer">
-          <FaGoogle className="text-xl" />
-          Continue with Google
+        <button
+          onClick={() => navigate("/edit-profile")}
+          className="w-full border-2 rounded-md border-gray-300 hover:border-black cursor-pointer p-4 font-bold"
+        >
+          View and edit your profile
         </button>
       </div>
 
-      <p className="text-center text-sm mt-4 cursor-pointer hover:underline">New to NSS? Create an account</p>
+      <div className="flex flex-col gap-1">
+        <div className="border-t border-t-gray-200" />
+
+        <div className="flex flex-col gap-4">
+          <button className="w-full border-gray-30 transition-colors cursor-pointer p-4 font-bold">My Ads</button>
+        </div>
+
+        <div className="border-t border-t-gray-200" />
+      </div>
+
+      <div className="mx-4">
+        <button className="w-full border-gray-300 bg-gradient-to-r from-blue-500 to-black text-white rounded-md cursor-pointer p-4 font-bold">Logout</button>
+      </div>
     </div>
-  </div>
+  );
 }

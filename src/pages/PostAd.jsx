@@ -1,10 +1,12 @@
 import Categories from "../components/Categories";
 import Image1 from "../assets/logo.png";
-import { NavLink } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
-import { FaPlus } from "react-icons/fa6";
-import { FaCamera } from "react-icons/fa";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import RenderWhen from "../components/RenderWhen";
+import { LuArrowLeft } from "react-icons/lu";
+import DropDown from "../components/Dropdown";
+import ImagePicker from "../components/ImagePicker";
+import Label from "../components/Label";
 
 const adProps = {
   "Item request": {
@@ -19,6 +21,7 @@ const adProps = {
     description: "Description*",
     hideCondition: true,
     resourceType: true,
+    hidePrice: true,
   },
   Events: {
     heading: "Name*",
@@ -31,10 +34,12 @@ const adProps = {
     description: "Service's Description*",
     priceHeading: "Service's Charges*",
     pricePlaceHolder: "Enter charges (PKR)",
+    hideCondition: true,
   },
 };
 
 export default function PostAd() {
+  const navigate = useNavigate();
   const [selectedCategory, selectedCategorySet] = useState(null);
   console.log(selectedCategory);
 
@@ -42,7 +47,13 @@ export default function PostAd() {
     <>
       <Nav />
       <div className="flex flex-col gap-4 py-10 container mx-auto max-w-screen-2xl">
-        <div className="text-4xl text-center font-bold uppercase">Post Your ad</div>
+        <div className="flex items-center justify-between gap-4 px-8">
+          <button onClick={() => (selectedCategory ? selectedCategorySet("") : navigate("/"))} className="relative z-10 cursor-pointer">
+            <LuArrowLeft className="size-8" color="#1c398e" />
+          </button>
+          <div className="text-4xl text-left font-bold uppercase">Post Your ad</div>
+          <div className="flex" />
+        </div>
         {selectedCategory ? (
           <div className="p-4">
             <Form selectedCategory={selectedCategory} selectedCategorySet={selectedCategorySet} />
@@ -203,69 +214,11 @@ function Form({ selectedCategory, selectedCategorySet, request = false }) {
         </div>
 
         <div className="flex w-full justify-end gap-8 p-8">
-          <button  className="w-fit flex items-center gap-2 cursor-pointer px-4 md:px-6 py-2 md:py-3 font-bold text-white rounded-full bg-gradient-to-r from-blue-500 to-black transition-all duration-300 ease-in-out transform hover:scale-105 hover:brightness-110">
+          <button className="w-fit flex items-center gap-2 cursor-pointer px-4 md:px-6 py-2 md:py-3 font-bold text-white rounded-full bg-gradient-to-r from-blue-500 to-black transition-all duration-300 ease-in-out transform hover:scale-105 hover:brightness-110">
             <span className="">Post now</span>
           </button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function Label({ name = "" }) {
-  return <div className="text-lg font-bold w-72">{name}</div>;
-}
-
-function ImagePicker({ cameraIcon = false }) {
-  return (
-    <div className="cursor-pointer rounded-lg size-24 border-2 border-gray-500 shadow-inner flex items-center justify-center">
-      {cameraIcon ? <FaCamera size="35" color="#6a7282" /> : <FaPlus size="35" color="#6a7282" />}
-    </div>
-  );
-}
-
-function DropDown({ value, valueSet, dropDownValues = [], placeholder = "" }) {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
-
-  // Handle category selection
-  const handleCategoryChange = selectedCategory => {
-    valueSet(selectedCategory);
-    setDropdownOpen(false);
-  };
-
-  // Close dropdown if clicked outside
-  useEffect(() => {
-    const handleClickOutside = event => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-  return (
-    <div className="relative flex-1" ref={dropdownRef}>
-      <input
-        value={value}
-        readOnly
-        aria-expanded={dropdownOpen}
-        onClick={() => setDropdownOpen(prev => !prev)}
-        className="flex-1 w-full border-2 border-gray-400 rounded-md p-4 text-lg"
-        placeholder={placeholder}
-      />
-      {dropdownOpen && (
-        <ul className="absolute w-full mt-2 bg-white border border-gray-300 shadow-lg rounded-lg max-h-60 overflow-y-auto z-50 transition-all duration-300">
-          {dropDownValues?.map((item, index) => (
-            <li key={index} className="px-4 py-3 hover:bg-gray-200 cursor-pointer transition" onClick={() => handleCategoryChange(item)}>
-              {item}
-            </li>
-          ))}
-        </ul>
-      )}
     </div>
   );
 }
