@@ -20,19 +20,33 @@ connectDB();
 const authMiddleware = authMiddlewareFactory(tokenBlacklist);
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (process.env.NODE_ENVIRONMENT === "production") {
+        const whitelist = [process.env.CLIENT];
+        const domainEscaped = process.env.CLIENT.replace(/\./g, "\\.");
+        const regex = new RegExp(`^https://(?:[a-z]+\\.)?${domainEscaped}(/.*)?$`);
+        if (whitelist.includes(origin) || regex.test(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      } else {
+        callback(null, true);
+      }
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Serve static files from the uploads directory
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Rate Limiting for Login API (Prevent Brute Force)
-const loginLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // Limit each IP to 5 login attempts per 15 minutes
-    message: { message: "Too many login attempts. Please try again later." },
-});
-app.use("/api/auth/login", loginLimiter);
+
 
 // Define Routes
 app.use("/api/auth", require("./routes/authRoutes.js"));

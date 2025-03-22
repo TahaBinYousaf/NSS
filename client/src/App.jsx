@@ -22,25 +22,24 @@ import MainCollection from "./pages/MainCollection";
 import PostAd from "./pages/PostAd";
 import Profile from "./auth/Profile";
 import Chat from "./pages/Chat";
-import { ShopProvider } from "./context/ShopContext"; // Assuming you have this
+import ResetPassword from "@/auth/ResetPassword";
 
 function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("");
-  
+
   const handleSearch = (query, category) => {
     setSearchQuery(query);
     setCategory(category);
   };
 
   return (
-    <ShopProvider>
+    <>
       <Navbar onSearch={handleSearch} />
-      
+
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<MainCollection searchQuery={searchQuery} category={category} />} />
-        
         {/* Collection routes */}
         <Route path="/items-for-sale" element={<Collection />} />
         <Route path="/collection" element={<Collection />} /> {/* Keep for backward compatibility */}
@@ -50,7 +49,6 @@ function App() {
         <Route path="/collection5" element={<Collection5 />} />
         <Route path="/collection6" element={<Collection6 />} />
         <Route path="/collection7" element={<Collection7 />} />
-        
         {/* Product detail routes */}
         <Route path="/product/:productid" element={<AccessProducts />} />
         <Route path="/product2/:productid" element={<AccessProducts2 />} />
@@ -60,15 +58,15 @@ function App() {
         <Route path="/product6/:productid" element={<AccessProducts6 />} />
         <Route path="/product7/:productid" element={<AccessProducts7 />} />
         <Route path="/product8/:productid" element={<AccessProducts8 />} />
-        
         {/* User-related routes */}
         <Route path="/post-ad" element={<PostAd />} />
         <Route path="/edit-profile" element={<Profile />} />
         <Route path="/chat" element={<Chat />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
-      
+
       <Footer />
-    </ShopProvider>
+    </>
   );
 }
 

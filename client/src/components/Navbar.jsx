@@ -4,16 +4,19 @@ import { IoMdSearch } from "react-icons/io";
 import { FaPlus, FaTimes } from "react-icons/fa";
 import { IoLocationOutline } from "react-icons/io5";
 import { IoIosArrowDown } from "react-icons/io";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 import Image1 from "../assets/logo.png";
-import ProfileImg from "../assets/logo1.png";
 import RenderWhen from "./RenderWhen";
 import Login from "../auth/Login";
 import Signup from "../auth/Signup";
 import Forget from "../auth/Forget";
 import Profile from "../auth/Profile";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "@/store/slice/authSlice";
+import DefaultAvatar from "@/assets/default-avatar.jpg";
 
 const Navbar = ({ onSearch }) => {
+  const dispatch = useDispatch();
   const [modalType, modalTypeSet] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("");
@@ -22,7 +25,7 @@ const Navbar = ({ onSearch }) => {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const [profileModalOpen, profileModalOpenSet] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const { user, isLoggedIn } = useSelector(state => state.auth);
 
   // Handle search input changes
   const handleSearch = e => {
@@ -68,16 +71,13 @@ const Navbar = ({ onSearch }) => {
   }, [searchQuery, category, onSearch]);
 
   const { pathname } = useLocation();
-  
+
   // Fix for the useMemo dependency issue - using useMemo for hideNavbarForPages
-  const hideNavbarForPages = useMemo(() => ["/post-ad"], []);
-  
+  const hideNavbarForPages = useMemo(() => ["/post-ad", "/reset-password"], []);
+
   // Now we can safely use hideNavbarForPages in another useMemo
-  const hideNavbar = useMemo(() => 
-    hideNavbarForPages.includes(pathname),
-    [pathname, hideNavbarForPages]
-  );
-  
+  const hideNavbar = useMemo(() => hideNavbarForPages.includes(pathname), [pathname, hideNavbarForPages]);
+
   return hideNavbar ? null : (
     <>
       <nav className="shadow-md px-4 md:px-8 py-6 bg-white">
@@ -151,11 +151,11 @@ const Navbar = ({ onSearch }) => {
               <div className="relative">
                 <div className="flex items-center gap-1" aria-expanded={profileModalOpen} onClick={() => profileModalOpenSet(pre => !pre)}>
                   <button className="relative cursor-pointer size-16 hover:bg-gray-200 rounded-full overflow-hidden ml-1">
-                    <img src={ProfileImg} className="size-full object-cover" alt="Profile" />
+                    <img src={user?.profileImage ?? DefaultAvatar} className="size-full object-cover" alt="Profile" />
                   </button>
                   <IoIosArrowDown className={`${profileModalOpen ? "" : "rotate-180"} size-5`} />
                 </div>
-                {profileModalOpen && <ProfileDropdown open={profileModalOpen} openSet={profileModalOpenSet} isLoggedInSet={setIsLoggedIn} />}
+                {profileModalOpen && <ProfileDropdown open={profileModalOpen} openSet={profileModalOpenSet} logout={() => dispatch(logout())} />}
               </div>
             ) : (
               <button
@@ -202,31 +202,23 @@ const Navbar = ({ onSearch }) => {
 
 // Add PropTypes validation for Navbar
 Navbar.propTypes = {
-  onSearch: PropTypes.func.isRequired
+  onSearch: PropTypes.func.isRequired,
 };
 
-function ProfileDropdown({ open, openSet, isLoggedInSet }) {
+function ProfileDropdown({ open, openSet, logout }) {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const { user } = useSelector(state => state.auth);
 
   // Updated Logout Function
   const onLogout = () => {
-    // Remove authentication tokens
-    localStorage.removeItem("authToken");
-    sessionStorage.removeItem("authToken");
-
-    // Update authentication state
-    isLoggedInSet(false); 
-    
-    // Close dropdown
+    logout();
     openSet(false);
-
-    // Redirect to main App page
     navigate("/"); // Changed from "/App" to "/" as the main page is typically the root route
   };
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = event => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         openSet(false);
       }
@@ -248,17 +240,14 @@ function ProfileDropdown({ open, openSet, isLoggedInSet }) {
       <div className="flex flex-col gap-4 mx-4">
         <div className="flex items-center gap-6">
           <div className="relative cursor-pointer size-16 hover:bg-gray-200 rounded-full overflow-hidden ml-1">
-            <img src={ProfileImg} alt="Profile" className="size-full object-cover" />
+            <img src={user?.profileImage ?? DefaultAvatar} alt="Profile" className="size-full object-cover" />
           </div>
           <div className="flex flex-col">
             <div>Hello,</div>
-            <div className="text-2xl font-bold">Qarar Ahmad</div>
+            <div className="text-2xl font-bold">{user?.name}</div>
           </div>
         </div>
-        <button
-          onClick={() => navigate("/edit-profile")}
-          className="w-full border border-gray-300 hover:border-black rounded-md cursor-pointer p-4 font-bold"
-        >
+        <button onClick={() => navigate("/edit-profile")} className="w-full border border-gray-300 hover:border-black rounded-md cursor-pointer p-4 font-bold">
           View and edit your profile
         </button>
       </div>
@@ -285,7 +274,7 @@ function ProfileDropdown({ open, openSet, isLoggedInSet }) {
 ProfileDropdown.propTypes = {
   open: PropTypes.bool.isRequired,
   openSet: PropTypes.func.isRequired,
-  isLoggedInSet: PropTypes.func.isRequired
+  isLoggedInSet: PropTypes.func.isRequired,
 };
 
 export default Navbar;
