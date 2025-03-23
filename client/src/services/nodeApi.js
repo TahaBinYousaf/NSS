@@ -96,9 +96,32 @@ const nodeApi = createApi({
         } catch (e) {}
       },
     }),
+
+    /** POSTS */
+    createPost: build.mutation({
+      query: formData => ({
+        method: "POST",
+        url: "/post",
+        body: formData,
+      }),
+      onQueryStarted: async (_, { queryFulfilled }) => {
+        try {
+          const response = await queryFulfilled;
+          toast.success(response.data.message);
+        } catch (e) {}
+      },
+    }),
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useForgotMutation, useResetMutation, useLazyVerifyResetTokenQuery, useChangeProfileMutation } = nodeApi;
+export const {
+  useLoginMutation,
+  useRegisterMutation,
+  useForgotMutation,
+  useResetMutation,
+  useLazyVerifyResetTokenQuery,
+  useChangeProfileMutation,
+  useCreatePostMutation,
+} = nodeApi;
 
 export default nodeApi;

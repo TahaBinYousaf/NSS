@@ -52,7 +52,7 @@ export default function Login({ modalTypeSet }) {
 
         <div className="space-y-1 mt-3">
           <Input
-            type="password"
+            password
             name="password"
             value={formik.values.password}
             onChange={formik.handleChange}

@@ -1,6 +1,6 @@
 import * as Yup from "yup";
 
-const createValidationSchema = fieldName => {
+export const createValidationSchema = fieldName => {
   return Yup.string().required(`${fieldName} is required`);
 };
 

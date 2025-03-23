@@ -76,7 +76,7 @@ export default function Profile() {
           </div>
 
           <div className="flex flex-col lg:flex-row w-full justify-between gap-4 border-b-2 border-b-gray-200 p-8">
-            <Label name="Profile Photo*" />
+            <Label name="Profile Photo" />
             <div className="flex flex-row flex-wrap items-center flex-1 gap-4">
               <div className="relative cursor-pointer size-28 hover:bg-gray-200 rounded-full overflow-hidden ml-1" onClick={triggerFileInput}>
                 <img
