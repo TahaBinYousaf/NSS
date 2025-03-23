@@ -14,6 +14,7 @@ import Profile from "../auth/Profile";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/store/slice/authSlice";
 import DefaultAvatar from "@/assets/default-avatar.jpg";
+import getImagePath from "@/utils/getImagePath";
 
 const Navbar = ({ onSearch }) => {
   const dispatch = useDispatch();
@@ -151,7 +152,7 @@ const Navbar = ({ onSearch }) => {
               <div className="relative">
                 <div className="flex items-center gap-1" aria-expanded={profileModalOpen} onClick={() => profileModalOpenSet(pre => !pre)}>
                   <button className="relative cursor-pointer size-16 hover:bg-gray-200 rounded-full overflow-hidden ml-1">
-                    <img src={user?.profileImage ?? DefaultAvatar} className="size-full object-cover" alt="Profile" />
+                    <img src={user?.profileImage ? getImagePath(user?.profileImage) : DefaultAvatar} className="size-full object-cover" alt="Profile" />
                   </button>
                   <IoIosArrowDown className={`${profileModalOpen ? "" : "rotate-180"} size-5`} />
                 </div>
@@ -240,7 +241,7 @@ function ProfileDropdown({ open, openSet, logout }) {
       <div className="flex flex-col gap-4 mx-4">
         <div className="flex items-center gap-6">
           <div className="relative cursor-pointer size-16 hover:bg-gray-200 rounded-full overflow-hidden ml-1">
-            <img src={user?.profileImage ?? DefaultAvatar} alt="Profile" className="size-full object-cover" />
+            <img src={user?.profileImage ? getImagePath(user?.profileImage) : DefaultAvatar} alt="Profile" className="size-full object-cover" />
           </div>
           <div className="flex flex-col">
             <div>Hello,</div>
