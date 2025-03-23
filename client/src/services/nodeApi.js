@@ -2,7 +2,7 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import baseQuery from "@/services/baseQuery";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
-import { setUser } from "@/store/slice/authSlice";
+import { setProfile, setUser } from "@/store/slice/authSlice";
 
 const nodeApi = createApi({
   baseQuery,
@@ -81,9 +81,24 @@ const nodeApi = createApi({
         } catch (e) {}
       },
     }),
+
+    changeProfile: build.mutation({
+      query: formData => ({
+        method: "PUT",
+        url: "/auth/profile",
+        body: formData,
+      }),
+      onQueryStarted: async (_, { dispatch, queryFulfilled }) => {
+        try {
+          const response = await queryFulfilled;
+          dispatch(setProfile(response.data.user));
+          toast.success(response.data.message);
+        } catch (e) {}
+      },
+    }),
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useForgotMutation, useResetMutation, useLazyVerifyResetTokenQuery } = nodeApi;
+export const { useLoginMutation, useRegisterMutation, useForgotMutation, useResetMutation, useLazyVerifyResetTokenQuery, useChangeProfileMutation } = nodeApi;
 
 export default nodeApi;

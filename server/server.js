@@ -1,23 +1,16 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const rateLimit = require("express-rate-limit");
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorHandler");
 const path = require("path");
-
-// Import the modules with tokenBlacklist
-const { router: logoutRouter, tokenBlacklist } = require("./routes/logoutRoute");
-const authMiddlewareFactory = require("./middleware/authMiddleware");
+const router = require("./routes/index.js");
 
 // Initialize Express
 const app = express();
 
 // Connect to Database
 connectDB();
-
-// Create the middleware with the blacklist
-const authMiddleware = authMiddlewareFactory(tokenBlacklist);
 
 // Middleware
 app.use(
@@ -47,12 +40,8 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Rate Limiting for Login API (Prevent Brute Force)
 
-
 // Define Routes
-app.use("/api/auth", require("./routes/authRoutes.js"));
-app.use("/api/items", authMiddleware, require("./routes/itemRoutes.js")); // Protected route
-app.use("/api/posts", authMiddleware, require("./routes/postRoutes.js")); // Protected route
-app.use("/api/auth", logoutRouter); // Using the imported logout router directly
+app.use("/api", router);
 
 // Error Handling Middleware (should be last)
 app.use(errorHandler);

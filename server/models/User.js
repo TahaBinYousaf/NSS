@@ -11,8 +11,6 @@ const UserSchema = new mongoose.Schema({
   // New fields for profile
   phone: { type: String },
   gender: { type: String },
-  dob: { type: String },
-  aboutMe: { type: String },
   profileImage: { type: String },
 });
 

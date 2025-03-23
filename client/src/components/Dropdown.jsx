@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 
-export default function DropDown({ value, valueSet, dropDownValues = [], placeholder = "" }) {
+export default function DropDown({ name = "", value, valueSet, dropDownValues = [], placeholder = "", error, errorMsg, validation = false, formikSet = null }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   // Handle category selection
   const handleCategoryChange = selectedCategory => {
-    valueSet(selectedCategory);
+    if (validation) {
+      formikSet(selectedCategory);
+    } else {
+      valueSet(selectedCategory);
+    }
     setDropdownOpen(false);
   };
 
@@ -26,11 +30,12 @@ export default function DropDown({ value, valueSet, dropDownValues = [], placeho
   return (
     <div className="relative flex-1" ref={dropdownRef}>
       <input
+        name={name}
         value={value}
         readOnly
         aria-expanded={dropdownOpen}
         onClick={() => setDropdownOpen(prev => !prev)}
-        className="flex-1 w-full border-2 border-gray-400 rounded-md p-4 text-lg"
+        className={`flex-1 w-full border-2  rounded-md p-4 text-lg ${!error ? "border-gray-400" : "border-red-500"}`}
         placeholder={placeholder}
       />
       {dropdownOpen && (
@@ -42,6 +47,7 @@ export default function DropDown({ value, valueSet, dropDownValues = [], placeho
           ))}
         </ul>
       )}
+      {validation && error && <div className="text-sm text-red-500">{errorMsg}</div>}
     </div>
   );
 }

@@ -20,9 +20,12 @@ const authSlice = createSlice({
       Cookies.remove("jwt_token");
       return initialState;
     },
+    setProfile: (state, action) => {
+      state.user = action.payload;
+    },
   },
 });
 
-export const { setUser, logout } = authSlice.actions;
+export const { setUser, logout, setProfile } = authSlice.actions;
 
 export default authSlice.reducer;

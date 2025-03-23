@@ -2,6 +2,8 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const path = require("path");
+const fs = require("fs");
 
 // register user API
 
@@ -25,14 +27,20 @@ exports.registerUser = async (req, res) => {
 exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).lean();
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
-    res.status(200).json({ message: "Logged In Successfully", token, user });
+    delete user.password;
+
+    res.status(200).json({
+      message: "Logged In Successfully",
+      token,
+      user,
+    });
   } catch (error) {
     res.status(500).json({ message: "Login failed, Try again" });
   }
@@ -115,7 +123,43 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
-exports.getProfile = async (req, res) => {
+exports.updateProfileWithImage = async (req, res) => {
   try {
-  } catch (err) {}
+    const { name, phone, gender, location } = req.body;
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ msg: "User not found" });
+    }
+
+    const updatedFields = {
+      name: name || user.name,
+      phone: phone || user.phone,
+      gender: gender || user.gender,
+      location: location || user.location,
+    };
+
+    if (req.file) {
+      if (user.profileImage) {
+        const oldImagePath = path.join(__dirname, "..", user.profileImage);
+
+        try {
+          fs.unlinkSync(oldImagePath);
+        } catch (error) {
+          if (error.code !== "ENOENT") {
+            console.error("Failed to delete old profile image:", error);
+          }
+        }
+      }
+
+      updatedFields.profileImage = `uploads/profile/${req.file.filename}`;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(req.user.id, { $set: updatedFields }, { new: true, select: "-password" });
+
+    res.status(200).json({ message: "Profile updated successfully", user: updatedUser });
+  } catch (err) {
+    console.error("Profile update error:", err.message);
+    res.status(500).json({ message: "Failed to update profile try again" });
+  }
 };

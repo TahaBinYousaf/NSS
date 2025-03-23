@@ -71,4 +71,11 @@ const SignupValidationSchema = Yup.object({
   confirmPassword: confirmPasswordValidation,
 });
 
-export { LoginValidationSchema, SignupValidationSchema, ForgetPasswordValidationSchema, ResetPasswordValidationSchema };
+const ProfileValidationSchema = Yup.object({
+  name: createValidationSchema("Name"),
+  gender: createValidationSchema("Gender"),
+  location: createValidationSchema("Location"),
+  phone: phoneValidation,
+});
+
+export { LoginValidationSchema, SignupValidationSchema, ForgetPasswordValidationSchema, ResetPasswordValidationSchema, ProfileValidationSchema };
