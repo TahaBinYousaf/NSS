@@ -10,12 +10,12 @@ import Image7 from "../assets/logo7.png";
 
 const links = [
   { name: "Items for sale", to: "/collection", imageSrc: Image7 },
-  { name: "Items to share", to: "/collection4", imageSrc: Image4 },
-  { name: "Items for rent", to: "/collection2", imageSrc: Image1 },
-  { name: "Item request", to: "/collection6", imageSrc: Image2 },
-  { name: "Resources", to: "/collection5", imageSrc: Image6 },
-  { name: "Events", to: "/collection3", imageSrc: Image3 },
-  { name: "Services", to: "/collection7", imageSrc: Image5 },
+  { name: "Items to share", to: "/collection", imageSrc: Image4 },
+  { name: "Items for rent", to: "/collection", imageSrc: Image1 },
+  { name: "Item request", to: "/collection", imageSrc: Image2 },
+  { name: "Resources", to: "/collection", imageSrc: Image6 },
+  { name: "Events", to: "/collection", imageSrc: Image3 },
+  { name: "Services", to: "/collection", imageSrc: Image5 },
 ];
 
 const Categories = ({ header = "", customLinkClick = false, categorySet, adProps }) => {
@@ -39,12 +39,12 @@ function Link({ to, imageSrc, name, customLinkClick = false, categorySet, ...res
   const navigate = useNavigate();
   function onClick(e) {
     e.preventDefault();
-    customLinkClick ? categorySet({ imageSrc, name, ...rest }) : navigate(to);
+    customLinkClick ? categorySet({ imageSrc, name, ...rest }) : navigate(`${to}/${name}`);
   }
 
   return (
     <div className="flex flex-col items-center" style={{ cursor: "pointer" }}>
-      <NavLink onClick={onClick} to={to}>
+      <NavLink onClick={onClick}>
         <img src={imageSrc} className="w-30 h-30 rounded-full border-2 border-gray-300 object-cover" />
       </NavLink>
       <p className="mt-2 text-gray-700 text-2xl font-bold">{name}</p>

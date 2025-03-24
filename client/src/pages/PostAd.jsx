@@ -1,7 +1,7 @@
 import Categories from "../components/Categories";
 import Image1 from "../assets/logo.png";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import RenderWhen from "../components/RenderWhen";
 import { LuArrowLeft } from "react-icons/lu";
 import DropDown from "../components/Dropdown";
@@ -35,6 +35,7 @@ const adProps = {
     description: "Description*",
     hideCondition: true,
     hidePrice: true,
+    showTime: true,
   },
   Services: {
     heading: "Service's Name*",
@@ -48,7 +49,6 @@ const adProps = {
 export default function PostAd() {
   const navigate = useNavigate();
   const [selectedCategory, selectedCategorySet] = useState(null);
-  console.log(selectedCategory);
 
   return (
     <>
@@ -106,6 +106,7 @@ function Form({ selectedCategory, selectedCategorySet, request = false }) {
   if (!adProps[selectedCategoryKey]?.hideCondition) initialValues.condition = "";
   if (!adProps[selectedCategoryKey]?.hidePrice) initialValues.price = "";
   if (adProps[selectedCategoryKey]?.resourceType) initialValues.resourceType = "";
+  if (adProps[selectedCategoryKey]?.showTime) initialValues.on = "";
 
   const formik = useValidation({
     initialValues,
@@ -118,6 +119,7 @@ function Form({ selectedCategory, selectedCategorySet, request = false }) {
       condition: adProps[selectedCategoryKey]?.hideCondition ? Yup.string().notRequired() : createValidationSchema("Category"),
       price: adProps[selectedCategoryKey]?.hidePrice ? Yup.string().notRequired() : createValidationSchema("Price"),
       resourceType: !adProps[selectedCategoryKey]?.resourceType ? Yup.string().notRequired() : createValidationSchema("ResourceType"),
+      on: !adProps[selectedCategoryKey]?.showTime ? Yup.string().notRequired() : createValidationSchema("Date & Time"),
     }),
   });
 
@@ -300,6 +302,22 @@ function Form({ selectedCategory, selectedCategorySet, request = false }) {
               errorMsg={formik.touched.location && formik.errors.location}
             />
           </div>
+
+          <RenderWhen is={selectedCategory?.showTime}>
+            <div className="flex flex-col lg:flex-row gap-4 flex-1">
+              <Label name="Date & Time*" />
+              <Input
+                variant="full"
+                placeholder="Enter Date & Time"
+                type="datetime-local"
+                name="on"
+                value={formik.values.on}
+                onChange={formik.handleChange}
+                error={formik.touched.on && !!formik.errors.on}
+                errorMsg={formik.touched.on && formik.errors.on}
+              />
+            </div>
+          </RenderWhen>
         </div>
       </div>
 

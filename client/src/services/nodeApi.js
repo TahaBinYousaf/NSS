@@ -111,6 +111,51 @@ const nodeApi = createApi({
         } catch (e) {}
       },
     }),
+
+    getPostsByCategory: build.query({
+      query: ({ category, limit, option }) => {
+        let url = `/post/${category}/${limit}/${option}`;
+        return {
+          method: "GET",
+          url,
+        };
+      },
+    }),
+
+    getPostById: build.query({
+      query: ({ productid }) => {
+        let url = `/post/getById/${productid}`;
+        return {
+          method: "GET",
+          url,
+        };
+      },
+    }),
+
+    /** MESSAGES */
+    getMessages: build.query({
+      query: ({ userId }) => {
+        let url = `/message/${userId}`;
+        return {
+          method: "GET",
+          url,
+        };
+      },
+    }),
+
+    sendMessage: build.mutation({
+      query: body => ({
+        method: "POST",
+        url: "/message",
+        body,
+      }),
+      onQueryStarted: async (_, { queryFulfilled }) => {
+        try {
+          const response = await queryFulfilled;
+          toast.success(response.data.message);
+        } catch (e) {}
+      },
+    }),
   }),
 });
 
@@ -122,6 +167,11 @@ export const {
   useLazyVerifyResetTokenQuery,
   useChangeProfileMutation,
   useCreatePostMutation,
+  // useLazyGetPostsByCategoryQuery,
+  useGetPostsByCategoryQuery,
+  useGetPostByIdQuery,
+  useLazyGetMessagesQuery,
+  useSendMessageMutation,
 } = nodeApi;
 
 export default nodeApi;

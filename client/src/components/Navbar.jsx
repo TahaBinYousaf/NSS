@@ -15,10 +15,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout } from "@/store/slice/authSlice";
 import DefaultAvatar from "@/assets/default-avatar.jpg";
 import getImagePath from "@/utils/getImagePath";
+import { authModalTypeSet } from "@/store/slice/config";
 
 const Navbar = ({ onSearch }) => {
   const dispatch = useDispatch();
-  const [modalType, modalTypeSet] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -27,6 +27,10 @@ const Navbar = ({ onSearch }) => {
   const navigate = useNavigate();
   const [profileModalOpen, profileModalOpenSet] = useState(false);
   const { user, isLoggedIn } = useSelector(state => state.auth);
+  const { authModalType } = useSelector(state => state.config);
+  const authModalSet = type => {
+    dispatch(authModalTypeSet(type));
+  };
 
   // Handle search input changes
   const handleSearch = e => {
@@ -160,7 +164,7 @@ const Navbar = ({ onSearch }) => {
               </div>
             ) : (
               <button
-                onClick={() => modalTypeSet("Login")}
+                onClick={() => authModalSet("Login")}
                 className="cursor-pointer text-sm md:text-lg font-bold transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-gray-200 px-4 py-2 rounded-md ml-1"
               >
                 Login
@@ -168,7 +172,7 @@ const Navbar = ({ onSearch }) => {
             )}
 
             <button
-              onClick={() => (isLoggedIn ? navigate("/post-ad") : modalTypeSet("Login"))}
+              onClick={() => (isLoggedIn ? navigate("/post-ad") : authModalSet("Login"))}
               className="flex items-center gap-2 cursor-pointer px-4 md:px-6 py-2 md:py-3 font-bold text-white rounded-full bg-gradient-to-r from-blue-500 to-black transition-all duration-300 ease-in-out transform hover:scale-105 hover:brightness-110"
             >
               <FaPlus className="font-bold" />
@@ -179,23 +183,23 @@ const Navbar = ({ onSearch }) => {
       </nav>
 
       {/* Login Modal */}
-      <RenderWhen is={modalType === "Login"}>
-        <Login modalTypeSet={modalTypeSet} />
+      <RenderWhen is={authModalType === "Login"}>
+        <Login modalTypeSet={authModalSet} />
       </RenderWhen>
 
       {/* Signup Modal */}
-      <RenderWhen is={modalType === "Signup"}>
-        <Signup modalTypeSet={modalTypeSet} />
+      <RenderWhen is={authModalType === "Signup"}>
+        <Signup modalTypeSet={authModalSet} />
       </RenderWhen>
 
       {/* Forget Modal */}
-      <RenderWhen is={modalType === "Forget"}>
-        <Forget modalTypeSet={modalTypeSet} />
+      <RenderWhen is={authModalType === "Forget"}>
+        <Forget modalTypeSet={authModalSet} />
       </RenderWhen>
 
       {/* Profile Modal */}
-      <RenderWhen is={modalType === "Profile"}>
-        <Profile modalTypeSet={modalTypeSet} />
+      <RenderWhen is={authModalType === "Profile"}>
+        <Profile modalTypeSet={authModalSet} />
       </RenderWhen>
     </>
   );
