@@ -14,6 +14,7 @@ import * as Yup from "yup";
 import { createValidationSchema } from "@/formik/validationSchema";
 import toast from "react-hot-toast";
 import { useCreatePostMutation } from "@/services/nodeApi";
+import PropTypes from 'prop-types';
 
 const adProps = {
   "Item request": {
@@ -101,6 +102,7 @@ function Form({ selectedCategory, selectedCategorySet, request = false }) {
     title: "",
     description: "",
     location: "",
+    type: request ? "request" : "post"
   };
 
   if (!adProps[selectedCategoryKey]?.hideCondition) initialValues.condition = "";
@@ -126,7 +128,7 @@ function Form({ selectedCategory, selectedCategorySet, request = false }) {
   async function handleSubmit(values) {
     const formData = new FormData();
 
-    if (!adProps[selectedCategoryKey]?.hideImages && !images.length) {
+    if (!request && !adProps[selectedCategoryKey]?.hideImages && !images.length) {
       toast.error("Please Select Images");
       return;
     } else if (images.length > 5) {
@@ -136,20 +138,27 @@ function Form({ selectedCategory, selectedCategorySet, request = false }) {
 
     console.log(values);
     formData.append("category", selectedCategoryKey);
+    formData.append("type", values.type);
+    
     Object.entries(values).forEach(([key, value]) => {
-      if (value) {
+      if (value && key !== 'type') {
         formData.append(key, value);
       }
     });
 
-    images.forEach(image => {
-      formData.append("images", image);
-    });
+    if (!request && images.length > 0) {
+      images.forEach(image => {
+        formData.append("images", image);
+      });
+    }
 
     try {
       const res = await createPost(formData);
       if (res?.data) navigate("/");
-    } catch (err) {}
+    } catch (error) {
+      console.error("Failed to create post:", error);
+      toast.error("Failed to create post");
+    }
   }
 
   const handleImageUpload = e => {
@@ -197,28 +206,30 @@ function Form({ selectedCategory, selectedCategorySet, request = false }) {
           </div>
         </div>
 
-        {/** UPLOAD IMAGES */}
-        <RenderWhen is={!selectedCategory?.hideImages}>
-          <div className="flex flex-col lg:flex-row w-full justify-between gap-4 border-b-2 border-b-gray-200 p-8">
-            <Label name="Upload Images*" />
-            <div className="flex flex-row flex-wrap items-center flex-1 gap-4">
-              <ImagePicker handleImageUpload={handleImageUpload} />
-              {images?.length
-                ? images.map((image, index) => {
-                    return (
-                      <ImagePicker
-                        handleSingleImageUpload={e => handleSingleImageUpload(e, index)}
-                        handleRemove={() => handleRemove(index)}
-                        preview
-                        key={index}
-                        image={image}
-                      />
-                    );
-                  })
-                : null}
+        {/** UPLOAD IMAGES - Only show if not a request */}
+        {!request && (
+          <RenderWhen is={!selectedCategory?.hideImages}>
+            <div className="flex flex-col lg:flex-row w-full justify-between gap-4 border-b-2 border-b-gray-200 p-8">
+              <Label name="Upload Images*" />
+              <div className="flex flex-row flex-wrap items-center flex-1 gap-4">
+                <ImagePicker handleImageUpload={handleImageUpload} />
+                {images?.length
+                  ? images.map((image, index) => {
+                      return (
+                        <ImagePicker
+                          handleSingleImageUpload={e => handleSingleImageUpload(e, index)}
+                          handleRemove={() => handleRemove(index)}
+                          preview
+                          key={index}
+                          image={image}
+                        />
+                      );
+                    })
+                  : null}
+              </div>
             </div>
-          </div>
-        </RenderWhen>
+          </RenderWhen>
+        )}
 
         {/** AD DETAILS */}
         <div className="flex flex-col w-full justify-between gap-8 p-8">
@@ -387,3 +398,25 @@ function Form({ selectedCategory, selectedCategorySet, request = false }) {
     </div>
   );
 }
+
+Form.propTypes = {
+  selectedCategory: PropTypes.shape({
+    name: PropTypes.string,
+    imageSrc: PropTypes.string,
+    hideImages: PropTypes.bool,
+    heading: PropTypes.string,
+    description: PropTypes.string,
+    resourceType: PropTypes.bool,
+    hideCondition: PropTypes.bool,
+    showTime: PropTypes.bool,
+    hidePrice: PropTypes.bool,
+    priceHeading: PropTypes.string,
+    pricePlaceHolder: PropTypes.string
+  }),
+  selectedCategorySet: PropTypes.func.isRequired,
+  request: PropTypes.bool
+};
+
+Form.defaultProps = {
+  request: false
+};

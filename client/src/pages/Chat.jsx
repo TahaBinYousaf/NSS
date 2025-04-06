@@ -1,101 +1,183 @@
-import { useEffect, useState } from "react";
-import Label from "../components/Label";
-import { useSelector } from "react-redux";
-import { useLazyGetMessagesQuery, useSendMessageMutation } from "@/services/nodeApi";
-import { useNavigate, useParams } from "react-router-dom";
-import Loader from "@/components/Loader";
-import { LuArrowLeft } from "react-icons/lu";
+import { useEffect, useState, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { nodeApi } from "../utils/nodeApi";
+import { FaArrowLeft } from "react-icons/fa";
+import PropTypes from "prop-types";
 
-export default function Chat() {
-  const { id } = useParams();
+const Message = ({ message, isMine }) => (
+  <div className={`flex ${isMine ? "justify-end" : "justify-start"} mb-4`}>
+    <div
+      className={`max-w-[70%] p-3 rounded-lg ${
+        isMine ? "bg-blue-500 text-white" : "bg-gray-200"
+      }`}
+    >
+      {message}
+    </div>
+  </div>
+);
+
+Message.propTypes = {
+  message: PropTypes.string.isRequired,
+  isMine: PropTypes.bool.isRequired,
+};
+
+const Chat = () => {
+  const { userId } = useParams();
   const navigate = useNavigate();
-  const { user } = useSelector(state => state.auth);
-  const [fetchData, { isLoading, isFetching }] = useLazyGetMessagesQuery();
-  const [send, { isLoading: sendLoading }] = useSendMessageMutation();
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const messagesEndRef = useRef(null);
 
-  const [message, messageSet] = useState("");
-  const [messages, messagesSet] = useState([]);
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
-  async function init() {
-    try {
-      const res = await fetchData({
-        userId: id,
-      });
-      if (res?.data) {
-        messagesSet(res?.data?.messages ?? []);
-      }
-    } catch (e) {}
-  }
   useEffect(() => {
-    init();
-  }, []);
+    scrollToBottom();
+  }, [messages]);
 
-  async function sendMessage() {
-    if (!message) return;
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        setLoading(true);
+        
+        // Check if userId is defined
+        if (!userId) {
+          console.error("User ID is undefined");
+          setError("Invalid user ID");
+          setLoading(false);
+          return;
+        }
+        
+        const response = await nodeApi.get(`/messages/${userId}`);
+        setMessages(response.data.messages);
+        setUser(response.data.user);
+        setError(null);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+        setError("Failed to load messages");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMessages();
+    const interval = setInterval(fetchMessages, 5000); // Poll every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [userId]);
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+
     try {
-      messageSet("");
-      messagesSet(pre => [...pre, { message, from: user._id }]);
-      await send({ message, to: id });
-    } catch (err) {
-      messagesSet(pre => pre.slice(0, -1));
+      await nodeApi.post("/messages", {
+        message: newMessage,
+        to: userId,
+      });
+      setNewMessage("");
+      const response = await nodeApi.get(`/messages/${userId}`);
+      setMessages(response.data.messages);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setError("Failed to send message");
     }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-red-500">{error}</div>
+      </div>
+    );
   }
 
   return (
-    <div className="container max-w-screen-xl mx-auto py-10 ">
-      <div className="flex flex-col justify-between rounded-lg bg-white border-2 border-gray-200 w-full max-h-full h-screen">
-        <div className="flex flex-col lg:flex-row w-full justify-between gap-4 border-b-2 border-b-gray-200 p-8">
-          <div className="flex items-center gap-4">
-            <button onClick={() => navigate(-1)} className="relative z-10 cursor-pointer">
-              <LuArrowLeft className="size-8" color="#1c398e" />
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+          {/* Header */}
+          <div className="bg-gray-100 p-4 flex items-center">
+            <button
+              onClick={() => navigate(-1)}
+              className="mr-4 text-gray-600 hover:text-gray-800"
+            >
+              <FaArrowLeft />
             </button>
-            <Label name="Chat" className="!text-4xl" />
+            <div className="flex items-center">
+              {user?.profileImage ? (
+                <img
+                  src={user.profileImage}
+                  alt={user.name}
+                  className="w-10 h-10 rounded-full mr-3 object-cover"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gray-300 mr-3 flex items-center justify-center">
+                  <span className="text-gray-600 text-lg">
+                    {user?.name?.[0]?.toUpperCase()}
+                  </span>
+                </div>
+              )}
+              <div>
+                <h2 className="text-lg font-semibold">{user?.name}</h2>
+                <p className="text-sm text-gray-500">{user?.email}</p>
+              </div>
+            </div>
           </div>
-        </div>
-        {/** NAME */}
-        {isLoading || isFetching ? (
-          <div className="h-full flex-1 relative">
-            <Loader />
-          </div>
-        ) : (
-          <div className="flex flex-col w-full gap-3 p-8 overflow-auto">
-            {messages?.length ? (
-              messages.map((message, index) => {
-                return <Message key={index} message={message} right={message?.from === user._id} />;
-              })
+
+          {/* Messages */}
+          <div className="h-[500px] overflow-y-auto p-4">
+            {messages.length === 0 ? (
+              <div className="flex items-center justify-center h-full text-gray-500">
+                No messages yet. Start a conversation!
+              </div>
             ) : (
-              <div className="flex-1 mx-auto">Type message to start a chat</div>
+              messages.map((msg) => (
+                <Message
+                  key={msg._id}
+                  message={msg.message}
+                  isMine={msg.from === localStorage.getItem("userId")}
+                />
+              ))
             )}
+            <div ref={messagesEndRef} />
           </div>
-        )}
 
-        <div className="flex w-full justify-end gap-8 p-8 border-t-2 border-t-gray-200">
-          <div className="flex flex-col lg:flex-row gap-4 flex-1">
-            <input
-              value={message}
-              onChange={e => messageSet(e.target.value)}
-              className="flex-1 w-full border-2 border-gray-400 rounded-md p-4 text-lg"
-              placeholder="Type a message"
-            />
-          </div>
-          <button
-            onClick={sendMessage}
-            className="w-fit flex items-center gap-2 cursor-pointer px-4 md:px-6 py-2 md:py-3 font-bold text-white rounded-full bg-gradient-to-r from-blue-500 to-black transition-all duration-300 ease-in-out transform hover:scale-105 hover:brightness-110"
-          >
-            {sendLoading ? "Sending" : "Send Message"}
-          </button>
+          {/* Message Input */}
+          <form onSubmit={sendMessage} className="p-4 border-t">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder="Type a message..."
+                className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="submit"
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                disabled={!newMessage.trim()}
+              >
+                Send
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
   );
-}
+};
 
-function Message({ right = false, message }) {
-  return (
-    <div className={`flex gap-4 flex-row flex-1 ${right && "justify-end"}`}>
-      <div className={`flex flex-col gap-1 max-w-1/2 ${right && "justify-end"}`}>
-        <div className={`${right ? "bg-blue-900 text-white" : " bg-gray-300 text-black"}  rounded-md p-4`}>{message.message}</div>
-      </div>
-    </div>
-  );
-}
+export default Chat;

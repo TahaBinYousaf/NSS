@@ -1,8 +1,27 @@
 import getImagePath from "@/utils/getImagePath";
 import { useState } from "react";
+import PropTypes from 'prop-types';
 
 export default function ImageSlider({ images }) {
   const [active, activeSet] = useState(0);
+  
+  // If no images or empty array, show placeholder
+  if (!images || images.length === 0) {
+    return (
+      <div className="size-full mx-auto">
+        <div id="default-carousel" className="relative rounded-lg overflow-hidden shadow-lg" data-carousel="static">
+          <div className="relative h-80 md:h-[500px]">
+            <div className="size-full flex items-center justify-center bg-gray-100">
+              <svg className="w-20 h-20 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="size-full mx-auto">
       <div id="default-carousel" className="relative rounded-lg overflow-hidden shadow-lg" data-carousel="static">
@@ -34,3 +53,7 @@ export default function ImageSlider({ images }) {
     </div>
   );
 }
+
+ImageSlider.propTypes = {
+  images: PropTypes.arrayOf(PropTypes.string)
+};

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { IoMdSearch } from "react-icons/io";
 import { FaPlus, FaTimes } from "react-icons/fa";
-import { IoLocationOutline } from "react-icons/io5";
+import { IoLocationOutline, IoChatbubbleOutline } from "react-icons/io5";
 import { IoIosArrowDown } from "react-icons/io";
 import PropTypes from "prop-types";
 import Image1 from "../assets/logo.png";
@@ -20,7 +20,8 @@ import { authModalTypeSet } from "@/store/slice/config";
 const Navbar = ({ onSearch }) => {
   const dispatch = useDispatch();
   const [searchQuery, setSearchQuery] = useState("");
-  const [category, setCategory] = useState("");
+  const [category] = useState("");
+  const [location, setLocation] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const searchRef = useRef(null);
   const dropdownRef = useRef(null);
@@ -34,18 +35,34 @@ const Navbar = ({ onSearch }) => {
 
   // Handle search input changes
   const handleSearch = e => {
-    setSearchQuery(e.target.value);
-    if (e.target.value.trim() || category) {
+    const query = e.target.value;
+    setSearchQuery(query);
+    console.log("Navbar - Search query changed:", query);
+    
+    // Call onSearch with the current search query, category, and location
+    onSearch(query, category, location);
+    
+    // Navigate to search page if there's a search query, category, or location
+    if (query.trim() || category || location) {
       navigate("/search");
     } else {
       navigate("/");
     }
   };
 
-  // Handle category selection
-  const handleCategoryChange = selectedCategory => {
-    setCategory(selectedCategory);
+  // Handle location selection
+  const handleLocationChange = (selectedLocation) => {
+    console.log("Navbar - handleLocationChange called with:", selectedLocation);
+    setLocation(selectedLocation);
     setDropdownOpen(false);
+    
+    // Call onSearch with the current search query, category, and new location
+    onSearch(searchQuery, category, selectedLocation);
+    
+    // Navigate to search page if there's a search query, category, or location
+    if (searchQuery.trim() || category || selectedLocation) {
+      navigate("/search");
+    }
   };
 
   // Clear search input
@@ -70,10 +87,11 @@ const Navbar = ({ onSearch }) => {
     };
   }, [searchQuery]);
 
-  // Trigger onSearch when query or category changes
+  // Trigger onSearch when query, category, or location changes
   useEffect(() => {
-    onSearch(searchQuery, category);
-  }, [searchQuery, category, onSearch]);
+    console.log("Navbar - Calling onSearch with:", { searchQuery, category, location });
+    onSearch(searchQuery, category, location);
+  }, [searchQuery, category, location, onSearch]);
 
   const { pathname } = useLocation();
 
@@ -106,7 +124,7 @@ const Navbar = ({ onSearch }) => {
                   aria-haspopup="listbox"
                 >
                   <IoLocationOutline className="text-gray-500 text-2xl" />
-                  <span className="text-gray-700 truncate">{category || "Lahore"}</span>
+                  <span className="text-gray-700 truncate">{location || "Select Location"}</span>
                   <span className="text-gray-500 text-lg">&#9662;</span>
                 </button>
                 {dropdownOpen && (
@@ -122,7 +140,11 @@ const Navbar = ({ onSearch }) => {
                       "Cantonment Cantt",
                       "Askari Housing Society",
                     ].map((item, index) => (
-                      <li key={index} className="px-4 py-3 hover:bg-gray-200 cursor-pointer transition" onClick={() => handleCategoryChange(item)}>
+                      <li 
+                        key={index} 
+                        className="px-4 py-3 hover:bg-gray-200 cursor-pointer transition" 
+                        onClick={() => handleLocationChange(item)}
+                      >
                         {item}
                       </li>
                     ))}
@@ -148,36 +170,36 @@ const Navbar = ({ onSearch }) => {
                 </div>
               </div>
             </div>
-          </div>
 
-          {/** PHOTO */}
-          <div className="flex items-center gap-1 md:gap-4 mt-4 md:mt-0 flex-row-reverse ml-4 md:ml-0 md:flex-row">
-            {isLoggedIn ? (
-              <div className="relative">
-                <div className="flex items-center gap-1" aria-expanded={profileModalOpen} onClick={() => profileModalOpenSet(pre => !pre)}>
-                  <button className="relative cursor-pointer size-16 hover:bg-gray-200 rounded-full overflow-hidden ml-1">
-                    <img src={user?.profileImage ? getImagePath(user?.profileImage) : DefaultAvatar} className="size-full object-cover" alt="Profile" />
-                  </button>
-                  <IoIosArrowDown className={`${profileModalOpen ? "" : "rotate-180"} size-5`} />
+            {/** PHOTO */}
+            <div className="flex items-center gap-1 md:gap-4 mt-4 md:mt-0 flex-row-reverse ml-4 md:ml-0 md:flex-row">
+              {isLoggedIn ? (
+                <div className="relative">
+                  <div className="flex items-center gap-1" aria-expanded={profileModalOpen} onClick={() => profileModalOpenSet(pre => !pre)}>
+                    <button className="relative cursor-pointer size-16 hover:bg-gray-200 rounded-full overflow-hidden ml-1">
+                      <img src={user?.profileImage ? getImagePath(user?.profileImage) : DefaultAvatar} className="size-full object-cover" alt="Profile" />
+                    </button>
+                    <IoIosArrowDown className={`${profileModalOpen ? "" : "rotate-180"} size-5`} />
+                  </div>
+                  {profileModalOpen && <ProfileDropdown open={profileModalOpen} openSet={profileModalOpenSet} logout={() => dispatch(logout())} />}
                 </div>
-                {profileModalOpen && <ProfileDropdown open={profileModalOpen} openSet={profileModalOpenSet} logout={() => dispatch(logout())} />}
-              </div>
-            ) : (
-              <button
-                onClick={() => authModalSet("Login")}
-                className="cursor-pointer text-sm md:text-lg font-bold transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-gray-200 px-4 py-2 rounded-md ml-1"
-              >
-                Login
-              </button>
-            )}
+              ) : (
+                <button
+                  onClick={() => authModalSet("Login")}
+                  className="cursor-pointer text-sm md:text-lg font-bold transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-gray-200 px-4 py-2 rounded-md ml-1"
+                >
+                  Login
+                </button>
+              )}
 
-            <button
-              onClick={() => (isLoggedIn ? navigate("/post-ad") : authModalSet("Login"))}
-              className="flex items-center gap-2 cursor-pointer px-4 md:px-6 py-2 md:py-3 font-bold text-white rounded-full bg-gradient-to-r from-blue-500 to-black transition-all duration-300 ease-in-out transform hover:scale-105 hover:brightness-110"
-            >
-              <FaPlus className="font-bold" />
-              <span className="">POST</span>
-            </button>
+              <button
+                onClick={() => (isLoggedIn ? navigate("/post-ad") : authModalSet("Login"))}
+                className="flex items-center gap-2 cursor-pointer px-4 md:px-6 py-2 md:py-3 font-bold text-white rounded-full bg-gradient-to-r from-blue-500 to-black transition-all duration-300 ease-in-out transform hover:scale-105 hover:brightness-110"
+              >
+                <FaPlus className="font-bold" />
+                <span className="">POST</span>
+              </button>
+            </div>
           </div>
         </div>
       </nav>
@@ -259,6 +281,10 @@ function ProfileDropdown({ open, openSet, logout }) {
       <div className="flex flex-col gap-1">
         <div className="border-t border-gray-200" />
         <div className="flex flex-col gap-4">
+          <button onClick={() => navigate("/messages")} className="w-full p-4 font-bold hover:bg-gray-100 flex items-center gap-2">
+            <IoChatbubbleOutline className="text-xl" />
+            Messages
+          </button>
           <button className="w-full p-4 font-bold hover:bg-gray-100">My Ads</button>
         </div>
         <div className="border-t border-gray-200" />
@@ -279,7 +305,7 @@ function ProfileDropdown({ open, openSet, logout }) {
 ProfileDropdown.propTypes = {
   open: PropTypes.bool.isRequired,
   openSet: PropTypes.func.isRequired,
-  isLoggedInSet: PropTypes.func.isRequired,
+  logout: PropTypes.func.isRequired,
 };
 
 export default Navbar;

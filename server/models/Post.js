@@ -9,6 +9,7 @@ const postSchema = new mongoose.Schema({
   location: String,
   price: String,
   resourceType: String,
+  type: { type: String, enum: ['post', 'request'], default: 'post' },
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   on: { type: Date },
   createdAt: { type: Date, default: Date.now },

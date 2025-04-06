@@ -23,7 +23,10 @@ const nodeApi = createApi({
           });
           dispatch(setUser(response.data.user));
           toast.success(response.data.message);
-        } catch (e) {}
+        } catch (error) {
+          console.error("Login error:", error);
+          toast.error("Login failed");
+        }
       },
     }),
 
@@ -37,7 +40,10 @@ const nodeApi = createApi({
         try {
           const response = await queryFulfilled;
           toast.success(response.data.message);
-        } catch (e) {}
+        } catch (error) {
+          console.error("Registration error:", error);
+          toast.error("Registration failed");
+        }
       },
     }),
 
@@ -51,7 +57,10 @@ const nodeApi = createApi({
         try {
           const response = await queryFulfilled;
           toast.success(response.data.message);
-        } catch (e) {}
+        } catch (error) {
+          console.error("Forgot password error:", error);
+          toast.error("Failed to process request");
+        }
       },
     }),
 
@@ -78,7 +87,10 @@ const nodeApi = createApi({
         try {
           const response = await queryFulfilled;
           toast.success(response.data.message);
-        } catch (e) {}
+        } catch (error) {
+          console.error("Reset password error:", error);
+          toast.error("Failed to reset password");
+        }
       },
     }),
 
@@ -93,7 +105,10 @@ const nodeApi = createApi({
           const response = await queryFulfilled;
           dispatch(setProfile(response.data.user));
           toast.success(response.data.message);
-        } catch (e) {}
+        } catch (error) {
+          console.error("Profile update error:", error);
+          toast.error("Failed to update profile");
+        }
       },
     }),
 
@@ -108,13 +123,33 @@ const nodeApi = createApi({
         try {
           const response = await queryFulfilled;
           toast.success(response.data.message);
-        } catch (e) {}
+        } catch (error) {
+          console.error("Create post error:", error);
+          toast.error("Failed to create post");
+        }
       },
     }),
 
     getPostsByCategory: build.query({
-      query: ({ category, limit, option }) => {
+      query: ({ category, limit, option, location, searchQuery }) => {
+        console.log("nodeApi - getPostsByCategory called with:", { category, limit, option, location, searchQuery });
         let url = `/post/${category}/${limit}/${option}`;
+        
+        // Add query parameters
+        const params = new URLSearchParams();
+        if (location) {
+          params.append('location', location);
+        }
+        if (searchQuery) {
+          params.append('searchQuery', searchQuery);
+        }
+        
+        // Add query parameters to URL if any exist
+        if (params.toString()) {
+          url += `?${params.toString()}`;
+        }
+        
+        console.log("nodeApi - Request URL:", url);
         return {
           method: "GET",
           url,
@@ -123,24 +158,25 @@ const nodeApi = createApi({
     }),
 
     getPostById: build.query({
-      query: ({ productid }) => {
-        let url = `/post/getById/${productid}`;
-        return {
-          method: "GET",
-          url,
-        };
-      },
+      query: ({ productid }) => ({
+        method: "GET",
+        url: `/post/getById/${productid}`,
+      }),
     }),
 
     /** MESSAGES */
     getMessages: build.query({
-      query: ({ userId }) => {
-        let url = `/message/${userId}`;
-        return {
-          method: "GET",
-          url,
-        };
-      },
+      query: ({ userId }) => ({
+        method: "GET",
+        url: `/message/${userId}`,
+      }),
+    }),
+
+    getConversations: build.query({
+      query: () => ({
+        method: "GET",
+        url: `/message/conversations/all`,
+      }),
     }),
 
     sendMessage: build.mutation({
@@ -153,7 +189,10 @@ const nodeApi = createApi({
         try {
           const response = await queryFulfilled;
           toast.success(response.data.message);
-        } catch (e) {}
+        } catch (error) {
+          console.error("Message send error:", error);
+          toast.error("Failed to send message");
+        }
       },
     }),
   }),
@@ -167,10 +206,10 @@ export const {
   useLazyVerifyResetTokenQuery,
   useChangeProfileMutation,
   useCreatePostMutation,
-  // useLazyGetPostsByCategoryQuery,
   useGetPostsByCategoryQuery,
   useGetPostByIdQuery,
   useLazyGetMessagesQuery,
+  useGetConversationsQuery,
   useSendMessageMutation,
 } = nodeApi;
 

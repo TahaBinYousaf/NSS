@@ -1,12 +1,18 @@
 const express = require("express");
-const { send, getAll } = require("../controllers/messageController.js");
-
-const { verifyToken } = require("../middleware/authMiddleware.js");
-
-
 const router = express.Router();
+const messageController = require("../controllers/messageController");
+const { verifyToken } = require("../middleware/authMiddleware");
 
-router.post("/", verifyToken, send);
-router.get("/:userId", verifyToken, getAll);
+// Apply authentication middleware to all routes
+router.use(verifyToken);
+
+// Get all conversations for the current user
+router.get("/conversations", messageController.getConversations);
+
+// Get messages between current user and another user
+router.get("/:userId", messageController.getAll);
+
+// Send a message
+router.post("/", messageController.send);
 
 module.exports = router;
