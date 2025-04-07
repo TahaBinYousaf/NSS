@@ -56,11 +56,11 @@ const AccessProducts = () => {
     return null;
   }
 
-  const isRequest = data.post.type === 'request';
+  const isRequest = data.post.type === "request";
   const userData = data.post.user || {};
-  const userName = userData.name || 'Unknown User';
-  const userPhone = userData.phone || 'No phone number available';
-  const userEmail = userData.email || 'No email available';
+  const userName = userData.name || "Unknown User";
+  const userPhone = userData.phone || "No phone number available";
+  const userEmail = userData.email || "No email available";
   const userProfileImage = userData.profileImage;
   const userId = userData._id;
 
@@ -77,11 +77,7 @@ const AccessProducts = () => {
           </button>
           <div className="uppercase text-4xl font-bold">
             {data.post.category}
-            {isRequest && (
-              <span className="ml-2 px-2 py-1 text-sm font-semibold bg-blue-100 text-blue-800 rounded-full">
-                REQUEST
-              </span>
-            )}
+            {isRequest && <span className="ml-2 px-2 py-1 text-sm font-semibold bg-blue-100 text-blue-800 rounded-full">REQUEST</span>}
           </div>
         </div>
         <div className="flex flex-col gap-8">
@@ -96,7 +92,7 @@ const AccessProducts = () => {
               )}
             </div>
 
-            <div className="w-full lg:w-1/3 border border-gray-300 rounded-xl p-4 sm:p-6 flex flex-col gap-4 h-[300px]">
+            <div className="w-full lg:w-1/3 border  border-gray-300 rounded-xl p-4 sm:p-6 flex flex-col gap-4 h-fit">
               <h1 className="text-2xl font-bold">Listed by {userName}</h1>
               <div className="flex gap-4 items-center">
                 <img
@@ -124,7 +120,7 @@ const AccessProducts = () => {
               )}
               {isLoggedIn ? (
                 <button
-                  onClick={() => userId ? navigate(`/chat/${userId}`) : console.error("User ID is undefined")}
+                  onClick={() => (userId ? navigate(`/chat/${userId}`) : console.error("User ID is undefined"))}
                   className="w-full flex items-center text-white justify-center gap-2 rounded-md py-3 cursor-pointer bg-gradient-to-r from-blue-500 to-black transition-all duration-300 ease-in-out transform hover:brightness-110"
                 >
                   <IoChatbubbleOutline className="text-xl" />
