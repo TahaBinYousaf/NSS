@@ -1,0 +1,50 @@
+version: '3.3'
+
+services:
+############################# Mongo DB ################################
+  mongodb:
+    image : mongo
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"  
+    volumes:
+      - ./mongo:/data/db
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro   
+
+############################# Server ###################################      
+  server:   
+    image: qarar18/fyp:server
+    depends_on:
+      - mongodb
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/nss-db
+      - PORT=5000
+      - JWT_SECRET=bs47pzic028
+      - EMAIL_USER=connect2nss@gmail.com
+      - EMAIL_PASS=szzq irxu ryul jbwe  
+      - EMAIL_HOST=smtp.gmail.com
+      - EMAIL_PORT=587
+      - EMAIL_SECURE=false
+      - FRONTEND_URL=http://localhost:5173
+    restart: always
+    ports:
+     - "5000:5000"
+    volumes:    
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+      
+  ########################## Client ###################################
+  react-frontend:
+    depends_on:
+      - server
+    image: fyp-client   
+    restart: always
+    ports:
+      - "5173:5173"
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+     
+    
