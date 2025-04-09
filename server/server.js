@@ -13,18 +13,20 @@ const app = express();
 connectDB();
 
 // Middleware
+const whitelist = [process.env.CLIENT];
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
+      if (!origin) return callback(null, true); // Allow mobile apps, curl, etc.
+
       if (process.env.NODE_ENVIRONMENT === "production") {
-        const whitelist = [process.env.CLIENT];
-        const domainEscaped = process.env.CLIENT.replace(/\./g, "\\.");
-        const regex = new RegExp(`^https://(?:[a-z]+\\.)?${domainEscaped}(/.*)?$`);
-        if (whitelist.includes(origin) || regex.test(origin)) {
+        const isWhitelisted = whitelist.includes(origin);
+        const regex = new RegExp(`^https://[a-z0-9\\-]+\\.ngrok-free\\.app$`);
+
+        if (isWhitelisted || regex.test(origin)) {
           callback(null, true);
         } else {
-          callback(new Error("Not allowed by CORS"));
+          callback(new Error("Not allowed by CORS: " + origin));
         }
       } else {
         callback(null, true);
@@ -33,14 +35,13 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(express.json());
 
 // Serve static files from the uploads directory
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Rate Limiting for Login API (Prevent Brute Force)
-
-// Define Routes
+// Routes
 app.use("/api", router);
 
 // Error Handling Middleware (should be last)
