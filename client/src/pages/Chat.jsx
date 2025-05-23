@@ -6,13 +6,7 @@ import PropTypes from "prop-types";
 
 const Message = ({ message, isMine }) => (
   <div className={`flex ${isMine ? "justify-end" : "justify-start"} mb-4`}>
-    <div
-      className={`max-w-[70%] p-3 rounded-lg ${
-        isMine ? "bg-blue-500 text-white" : "bg-gray-200"
-      }`}
-    >
-      {message}
-    </div>
+    <div className={`max-w-[70%] p-3 rounded-lg ${isMine ? "bg-blue-500 text-white" : "bg-gray-200"}`}>{message}</div>
   </div>
 );
 
@@ -22,7 +16,7 @@ Message.propTypes = {
 };
 
 const Chat = () => {
-  const { userId } = useParams();
+  const { id: userId } = useParams();
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
@@ -43,7 +37,7 @@ const Chat = () => {
     const fetchMessages = async () => {
       try {
         setLoading(true);
-        
+
         // Check if userId is defined
         if (!userId) {
           console.error("User ID is undefined");
@@ -51,8 +45,8 @@ const Chat = () => {
           setLoading(false);
           return;
         }
-        
-        const response = await nodeApi.get(`/messages/${userId}`);
+
+        const response = await nodeApi.get(`/message/${userId}`);
         setMessages(response.data.messages);
         setUser(response.data.user);
         setError(null);
@@ -70,17 +64,17 @@ const Chat = () => {
     return () => clearInterval(interval);
   }, [userId]);
 
-  const sendMessage = async (e) => {
+  const sendMessage = async e => {
     e.preventDefault();
     if (!newMessage.trim()) return;
 
     try {
-      await nodeApi.post("/messages", {
+      await nodeApi.post("/message", {
         message: newMessage,
         to: userId,
       });
       setNewMessage("");
-      const response = await nodeApi.get(`/messages/${userId}`);
+      const response = await nodeApi.get(`/message/${userId}`);
       setMessages(response.data.messages);
     } catch (error) {
       console.error("Error sending message:", error);
@@ -110,24 +104,15 @@ const Chat = () => {
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Header */}
           <div className="bg-gray-100 p-4 flex items-center">
-            <button
-              onClick={() => navigate(-1)}
-              className="mr-4 text-gray-600 hover:text-gray-800"
-            >
+            <button onClick={() => navigate(-1)} className="mr-4 text-gray-600 hover:text-gray-800">
               <FaArrowLeft />
             </button>
             <div className="flex items-center">
               {user?.profileImage ? (
-                <img
-                  src={user.profileImage}
-                  alt={user.name}
-                  className="w-10 h-10 rounded-full mr-3 object-cover"
-                />
+                <img src={user.profileImage} alt={user.name} className="w-10 h-10 rounded-full mr-3 object-cover" />
               ) : (
                 <div className="w-10 h-10 rounded-full bg-gray-300 mr-3 flex items-center justify-center">
-                  <span className="text-gray-600 text-lg">
-                    {user?.name?.[0]?.toUpperCase()}
-                  </span>
+                  <span className="text-gray-600 text-lg">{user?.name?.[0]?.toUpperCase()}</span>
                 </div>
               )}
               <div>
@@ -140,17 +125,9 @@ const Chat = () => {
           {/* Messages */}
           <div className="h-[500px] overflow-y-auto p-4">
             {messages.length === 0 ? (
-              <div className="flex items-center justify-center h-full text-gray-500">
-                No messages yet. Start a conversation!
-              </div>
+              <div className="flex items-center justify-center h-full text-gray-500">No messages yet. Start a conversation!</div>
             ) : (
-              messages.map((msg) => (
-                <Message
-                  key={msg._id}
-                  message={msg.message}
-                  isMine={msg.from === localStorage.getItem("userId")}
-                />
-              ))
+              messages.map(msg => <Message key={msg._id} message={msg.message} isMine={msg.from === localStorage.getItem("userId")} />)
             )}
             <div ref={messagesEndRef} />
           </div>
@@ -161,15 +138,11 @@ const Chat = () => {
               <input
                 type="text"
                 value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
+                onChange={e => setNewMessage(e.target.value)}
                 placeholder="Type a message..."
                 className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <button
-                type="submit"
-                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
-                disabled={!newMessage.trim()}
-              >
+              <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors" disabled={!newMessage.trim()}>
                 Send
               </button>
             </div>

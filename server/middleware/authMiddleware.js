@@ -1,10 +1,10 @@
 const jwt = require("jsonwebtoken");
 
 exports.verifyToken = (req, res, next) => {
-  const authHeader = req.header("Authorization");
+  const authHeader = req.headers.authorization || req.cookies.jwt_token;
   if (!authHeader) throw new Error("No Header");
 
-  const token = authHeader.split(" ")[1];
+  const token = authHeader.split(" ")[1] || authHeader;
   if (!token) throw new Error("No Token");
 
   try {

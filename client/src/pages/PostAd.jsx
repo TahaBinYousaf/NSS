@@ -14,7 +14,7 @@ import * as Yup from "yup";
 import { createValidationSchema } from "@/formik/validationSchema";
 import toast from "react-hot-toast";
 import { useCreatePostMutation } from "@/services/nodeApi";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 
 const adProps = {
   "Item request": {
@@ -23,6 +23,7 @@ const adProps = {
     hideCondition: true,
     hidePrice: true,
     hideImages: true,
+    request: true,
   },
   Resources: {
     heading: "Name*",
@@ -102,9 +103,9 @@ function Form({ selectedCategory, selectedCategorySet, request = false }) {
     title: "",
     description: "",
     location: "",
-    type: request ? "request" : "post"
   };
 
+  adProps?.[selectedCategoryKey]?.request ? (initialValues.type = "request") : (initialValues.type = "post");
   if (!adProps[selectedCategoryKey]?.hideCondition) initialValues.condition = "";
   if (!adProps[selectedCategoryKey]?.hidePrice) initialValues.price = "";
   if (adProps[selectedCategoryKey]?.resourceType) initialValues.resourceType = "";
@@ -139,9 +140,9 @@ function Form({ selectedCategory, selectedCategorySet, request = false }) {
     console.log(values);
     formData.append("category", selectedCategoryKey);
     formData.append("type", values.type);
-    
+
     Object.entries(values).forEach(([key, value]) => {
-      if (value && key !== 'type') {
+      if (value && key !== "type") {
         formData.append(key, value);
       }
     });
@@ -411,12 +412,12 @@ Form.propTypes = {
     showTime: PropTypes.bool,
     hidePrice: PropTypes.bool,
     priceHeading: PropTypes.string,
-    pricePlaceHolder: PropTypes.string
+    pricePlaceHolder: PropTypes.string,
   }),
   selectedCategorySet: PropTypes.func.isRequired,
-  request: PropTypes.bool
+  request: PropTypes.bool,
 };
 
 Form.defaultProps = {
-  request: false
+  request: false,
 };

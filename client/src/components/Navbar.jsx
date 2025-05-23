@@ -38,10 +38,10 @@ const Navbar = ({ onSearch }) => {
     const query = e.target.value;
     setSearchQuery(query);
     console.log("Navbar - Search query changed:", query);
-    
+
     // Call onSearch with the current search query, category, and location
     onSearch(query, category, location);
-    
+
     // Navigate to search page if there's a search query, category, or location
     if (query.trim() || category || location) {
       navigate("/search");
@@ -51,18 +51,10 @@ const Navbar = ({ onSearch }) => {
   };
 
   // Handle location selection
-  const handleLocationChange = (selectedLocation) => {
+  const handleLocationChange = selectedLocation => {
     console.log("Navbar - handleLocationChange called with:", selectedLocation);
     setLocation(selectedLocation);
     setDropdownOpen(false);
-    
-    // Call onSearch with the current search query, category, and new location
-    onSearch(searchQuery, category, selectedLocation);
-    
-    // Navigate to search page if there's a search query, category, or location
-    if (searchQuery.trim() || category || selectedLocation) {
-      navigate("/search");
-    }
   };
 
   // Clear search input
@@ -124,7 +116,7 @@ const Navbar = ({ onSearch }) => {
                   aria-haspopup="listbox"
                 >
                   <IoLocationOutline className="text-gray-500 text-2xl" />
-                  <span className="text-gray-700 truncate">{location || "Select Location"}</span>
+                  <span className="text-gray-700 truncate">{location || "Lahore"}</span>
                   <span className="text-gray-500 text-lg">&#9662;</span>
                 </button>
                 {dropdownOpen && (
@@ -140,11 +132,7 @@ const Navbar = ({ onSearch }) => {
                       "Cantonment Cantt",
                       "Askari Housing Society",
                     ].map((item, index) => (
-                      <li 
-                        key={index} 
-                        className="px-4 py-3 hover:bg-gray-200 cursor-pointer transition" 
-                        onClick={() => handleLocationChange(item)}
-                      >
+                      <li key={index} className="px-4 py-3 hover:bg-gray-200 cursor-pointer transition" onClick={() => handleLocationChange(item)}>
                         {item}
                       </li>
                     ))}
@@ -179,7 +167,7 @@ const Navbar = ({ onSearch }) => {
                     <button className="relative cursor-pointer size-16 hover:bg-gray-200 rounded-full overflow-hidden ml-1">
                       <img src={user?.profileImage ? getImagePath(user?.profileImage) : DefaultAvatar} className="size-full object-cover" alt="Profile" />
                     </button>
-                    <IoIosArrowDown className={`${profileModalOpen ? "" : "rotate-180"} size-5`} />
+                    <IoIosArrowDown className={`${profileModalOpen ? "rotate-180" : ""} size-5`} />
                   </div>
                   {profileModalOpen && <ProfileDropdown open={profileModalOpen} openSet={profileModalOpenSet} logout={() => dispatch(logout())} />}
                 </div>
@@ -281,11 +269,13 @@ function ProfileDropdown({ open, openSet, logout }) {
       <div className="flex flex-col gap-1">
         <div className="border-t border-gray-200" />
         <div className="flex flex-col gap-4">
-          <button onClick={() => navigate("/messages")} className="w-full p-4 font-bold hover:bg-gray-100 flex items-center gap-2">
+          <button onClick={() => navigate("/messages")} className="w-full p-4 font-bold hover:bg-gray-100 flex items-center gap-2 cursor-pointer">
             <IoChatbubbleOutline className="text-xl" />
             Messages
           </button>
-          <button className="w-full p-4 font-bold hover:bg-gray-100">My Ads</button>
+          <button onClick={() => navigate("/my-ads")} className="w-full p-4 font-bold hover:bg-gray-100 cursor-pointer">
+            My Ads
+          </button>
         </div>
         <div className="border-t border-gray-200" />
       </div>

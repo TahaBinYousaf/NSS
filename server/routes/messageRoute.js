@@ -10,7 +10,7 @@ router.use(verifyToken);
 router.get("/conversations", messageController.getConversations);
 
 // Get messages between current user and another user
-router.get("/:userId", messageController.getAll);
+router.get("/:userId", verifyToken, messageController.getAll);
 
 // Send a message
 router.post("/", messageController.send);
