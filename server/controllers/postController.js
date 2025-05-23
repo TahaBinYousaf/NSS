@@ -146,9 +146,9 @@ exports.getPostById = async (req, res) => {
   }
 };
 
-exports.getAllPosts = async (_, res) => {
+exports.getAllPosts = async (req, res) => {
   try {
-    const posts = await Post.find({}).lean();
+    const posts = await Post.find({user: req.user.id}).lean();
 
     return res.status(200).json({ posts });
   } catch (err) {
