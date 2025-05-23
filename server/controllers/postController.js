@@ -145,3 +145,26 @@ exports.getPostById = async (req, res) => {
     return res.status(500).json({ message: "Error fetching post" });
   }
 };
+
+exports.getAllPosts = async (_, res) => {
+  try {
+    const posts = await Post.find({}).lean();
+
+    return res.status(200).json({ posts });
+  } catch (err) {
+    console.error("Error in getAllPosts:", err);
+    return res.status(500).json({ message: "Error fetching posts" });
+  }
+};
+
+exports.deletePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await Post.findByIdAndDelete(id);
+    return res.status(200).json({ message: "Post Deleted Successfully" });
+  } catch (err) {
+    console.error("Error in getAllPosts:", err);
+    return res.status(500).json({ message: "Error deleting post" });
+  }
+};

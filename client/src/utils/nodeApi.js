@@ -1,30 +1,30 @@
 import axios from "axios";
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:5001";
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:5001/api";
 
 export const nodeApi = axios.create({
-  baseURL: SERVER_URL,
+  baseURL: "http://localhost:5001/api",
   withCredentials: true,
 });
 
 // Add request interceptor to include auth token
 nodeApi.interceptors.request.use(
-  (config) => {
+  config => {
     const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => {
+  error => {
     return Promise.reject(error);
   }
 );
 
 // Add response interceptor to handle errors
 nodeApi.interceptors.response.use(
-  (response) => response,
-  (error) => {
+  response => response,
+  error => {
     if (error.response?.status === 401) {
       // Handle unauthorized access
       localStorage.removeItem("token");
@@ -46,4 +46,4 @@ export const getUserId = () => {
   return localStorage.getItem("userId");
 };
 
-export default nodeApi; 
+export default nodeApi;

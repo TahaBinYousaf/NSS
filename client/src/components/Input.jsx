@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GoEye, GoEyeClosed } from "react-icons/go";
 
 export default function Input({
@@ -15,10 +15,22 @@ export default function Input({
   password = false,
 }) {
   const [isPassword, isPasswordSet] = useState(password ?? false);
+  const [minDateTime, setMinDateTime] = useState("");
+
+  useEffect(() => {
+    if (type === "datetime-local") {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      const formatted = now.toISOString().slice(0, 16);
+      setMinDateTime(formatted);
+    }
+  }, [type]);
+
   return (
     <div className={`${containerClassName} relative flex-1 flex flex-col gap-1`}>
       {variant === "full" && (
         <input
+          {...(type === "datetime-local" ? { min: minDateTime } : {})}
           type={type}
           id={name}
           name={name}
@@ -46,6 +58,7 @@ export default function Input({
       {variant === "default" && (
         <>
           <input
+            {...(type === "datetime-local" ? { min: minDateTime } : {})}
             type={password ? (isPassword ? "password" : "text") : type}
             id={name}
             name={name}

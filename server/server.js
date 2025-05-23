@@ -5,6 +5,8 @@ const connectDB = require("./config/db");
 const errorHandler = require("./middleware/errorHandler");
 const path = require("path");
 const router = require("./routes/index.js");
+const cookieParser = require('cookie-parser');
+
 
 // Initialize Express
 const app = express();
@@ -37,6 +39,7 @@ app.use(
 );
 
 app.use(express.json());
+app.use(cookieParser());
 
 // Serve static files from the uploads directory
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));

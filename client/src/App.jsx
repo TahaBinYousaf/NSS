@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import { useState, useEffect } from "react";
 import Home from "./pages/Home";
@@ -11,8 +11,11 @@ import Profile from "./auth/Profile";
 import Chat from "./pages/Chat";
 import ChatInbox from "./pages/ChatInbox";
 import ResetPassword from "@/auth/ResetPassword";
+import { useSelector } from "react-redux";
+import MyAds from "./pages/MyAds";
 
 function App() {
+  const { isLoggedIn } = useSelector(state => state.auth);
   const [searchQuery, setSearchQuery] = useState("");
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
@@ -35,16 +38,7 @@ function App() {
 
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route 
-          path="/search" 
-          element={
-            <MainCollection 
-              searchQuery={searchQuery} 
-              category={category} 
-              location={location} 
-            />
-          } 
-        />
+        <Route path="/search" element={<MainCollection searchQuery={searchQuery} category={category} location={location} />} />
         {/* Collection routes */}
         <Route path="/items-for-sale" element={<Collection />} />
         <Route path="/collection/:category" element={<Collection />} /> {/* Keep for backward compatibility */}
@@ -56,6 +50,7 @@ function App() {
         <Route path="/chat/:id" element={<Chat />} />
         <Route path="/messages" element={<ChatInbox />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/my-ads" element={isLoggedIn ? <MyAds /> : <Navigate to="/" />} />
       </Routes>
 
       <Footer />

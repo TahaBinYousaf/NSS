@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { createPost, getPostsByCategory, getPostById } = require("../controllers/postController");
+const { createPost, getPostsByCategory, getPostById, getAllPosts, deletePost } = require("../controllers/postController");
 const { upload } = require("../services/multer");
 const { verifyToken } = require("../middleware/authMiddleware");
 
@@ -12,5 +12,8 @@ router.get("/:category/:limit/:option", getPostsByCategory);
 
 // Get post by ID with user details
 router.get("/getById/:id", getPostById);
+
+router.get("/getAll", verifyToken, getAllPosts);
+router.delete("/:id", verifyToken, deletePost);
 
 module.exports = router;

@@ -134,26 +134,48 @@ const nodeApi = createApi({
       query: ({ category, limit, option, location, searchQuery }) => {
         console.log("nodeApi - getPostsByCategory called with:", { category, limit, option, location, searchQuery });
         let url = `/post/${category}/${limit}/${option}`;
-        
+
         // Add query parameters
         const params = new URLSearchParams();
         if (location) {
-          params.append('location', location);
+          params.append("location", location);
         }
         if (searchQuery) {
-          params.append('searchQuery', searchQuery);
+          params.append("searchQuery", searchQuery);
         }
-        
+
         // Add query parameters to URL if any exist
         if (params.toString()) {
           url += `?${params.toString()}`;
         }
-        
+
         console.log("nodeApi - Request URL:", url);
         return {
           method: "GET",
           url,
         };
+      },
+    }),
+
+    getAllPosts: build.query({
+      query: () => ({
+        method: "GET",
+        url: `/post/getAll`,
+      }),
+    }),
+
+    deletePost: build.mutation({
+      query: id => ({
+        method: "DELETE",
+        url: `/post/${id}`,
+      }),
+      onQueryStarted: async (_, { queryFulfilled }) => {
+        try {
+          const response = await queryFulfilled;
+          toast.success(response.data.message);
+        } catch (error) {
+          toast.error("Failed to delete post");
+        }
       },
     }),
 
@@ -211,6 +233,8 @@ export const {
   useLazyGetMessagesQuery,
   useGetConversationsQuery,
   useSendMessageMutation,
+  useGetAllPostsQuery,
+  useDeletePostMutation,
 } = nodeApi;
 
 export default nodeApi;

@@ -82,16 +82,11 @@ const AccessProducts = () => {
         </div>
         <div className="flex flex-col gap-8">
           <div className="flex flex-col lg:flex-row gap-8">
-            <div className="w-full lg:w-2/3 border border-gray-300 rounded-xl p-4 sm:p-6 bg-gray-100">
-              {isRequest ? (
-                <div className="w-full h-[500px] flex items-center justify-center">
-                  <FaHandHoldingHeart className="text-8xl text-blue-500" />
-                </div>
-              ) : (
+            {!isRequest && (
+              <div className="w-full lg:w-2/3 border border-gray-300 rounded-xl p-4 sm:p-6 bg-gray-100">
                 <ImageSlider images={data.post.images} />
-              )}
-            </div>
-
+              </div>
+            )}
             <div className="w-full lg:w-1/3 border  border-gray-300 rounded-xl p-4 sm:p-6 flex flex-col gap-4 h-fit">
               <h1 className="text-2xl font-bold">Listed by {userName}</h1>
               <div className="flex gap-4 items-center">
@@ -168,6 +163,8 @@ const AccessProducts = () => {
               </RenderWhen>
             </div>
           </div>
+
+          <h1 className="text-3xl px-4 sm:px-8 font-bold">{data.post?.title}</h1>
 
           <div className="w-full sm:w-1/2 border border-gray-300 rounded-xl py-6 px-4 sm:px-8">
             <h1 className="text-3xl pb-6 font-bold">Description</h1>
